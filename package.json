@@ -1,0 +1,31 @@
+{
+    "name": "@levihub/ocss",
+    "version": "1.0.0",
+    "description": "Orientation-driven CSS.",
+    "main": "./dist/ocss.cjs",
+    "module": "./dist/ocss.mjs",
+    "type": "module",
+    "bin": {
+        "ocss": "./bin/ocss.cjs",
+        "ocss-esm": "./bin/ocss.mjs"
+    },
+    "exports": {
+        ".": {
+            "require": "./dist/ocss.cjs",
+            "import": "./dist/ocss.mjs"
+        }
+    },
+    "author": "Leviatan1121 (https://levihub.dev)",
+    "license": "ISC",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Leviatan1121/ocss.git"
+    },
+    "keywords": [
+        "ocss"
+    ],
+    "bugs": {
+        "url": "https://github.com/Leviatan1121/ocss/issues"
+    },
+    "homepage": "https://github.com/Leviatan1121/ocss#readme"
+}

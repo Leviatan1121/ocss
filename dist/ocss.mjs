@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import path from 'path';
 
 const filesData = {};
+const tempFilesData = {};
 
 async function detectFiles(dir) {
     const files = [];
@@ -83,8 +84,10 @@ function processOCss(content) {
     return newContent;
 }
 
-export default function ocss(workingDir) {
+export default function ocss(workingDir, delay = 5000) {
+    const checkDelay = delay / 2; // Dividimos el delay entre 2 para mantener el tiempo total
     console.log('OCSS is running in:', workingDir);
+    console.log('Watching interval:', (delay/1000) + ' seconds');
     console.log('Change css files to .o.css extension');
     
     setInterval(async () => {
@@ -94,18 +97,23 @@ export default function ocss(workingDir) {
             return { file, content };
         }));
         
+        // Verificar y procesar los archivos
         for (const { file, content } of newData) {
             if (!filesData[file] || filesData[file] !== content) {
-                filesData[file] = content;
-                const cssContent = processOCss(content);
-                await fs.writeFile(file.replace('.o.css', '.css'), cssContent);
+                if (!tempFilesData[file]) {
+                    // Primera detección de cambio
+                    tempFilesData[file] = content;
+                } else if (tempFilesData[file] === content) {
+                    // El contenido se mantiene estable, procesar el archivo
+                    filesData[file] = content;
+                    const cssContent = processOCss(content);
+                    await fs.writeFile(file.replace('.o.css', '.css'), cssContent);
+                    delete tempFilesData[file]; // Limpiar el temporal
+                } else {
+                    // El contenido cambió, actualizar temporal
+                    tempFilesData[file] = content;
+                }
             }
         }
-    }, 1000);
-}
-
-// Ejecutar si se llama directamente
-if (import.meta.url === `file://${process.argv[1]}`) {
-    const currentDir = process.cwd();
-    ocss(currentDir);
+    }, checkDelay);
 }

@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const filesData = {};
+const tempFilesData = {};
 
 async function detectFiles(dir) {
     const files = [];
@@ -84,8 +85,10 @@ function processOCss(content) {
 }
 
 
-function ocss(workingDir) {
+function ocss(workingDir, delay = 5000) {
+    const checkDelay = delay / 2; // Dividimos el delay entre 2 para mantener el tiempo total
     console.log('OCSS is running in:', workingDir);
+    console.log('Watching interval:', (delay/1000) + ' seconds');
     console.log('Change css files to .o.css extension');
     
     setInterval(async () => {
@@ -95,15 +98,25 @@ function ocss(workingDir) {
             return { file, content };
         }));
         
-        // Actualizar los datos de los archivos
+        // Verificar y procesar los archivos
         newData.forEach(({ file, content }) => {
             if (!filesData[file] || filesData[file] !== content) {
-                filesData[file] = content;
-                const cssContent = processOCss(content);
-                fs.writeFileSync(file.replace('.o.css', '.css'), cssContent);
+                if (!tempFilesData[file]) {
+                    // Primera detección de cambio
+                    tempFilesData[file] = content;
+                } else if (tempFilesData[file] === content) {
+                    // El contenido se mantiene estable, procesar el archivo
+                    filesData[file] = content;
+                    const cssContent = processOCss(content);
+                    fs.writeFileSync(file.replace('.o.css', '.css'), cssContent);
+                    delete tempFilesData[file]; // Limpiar el temporal
+                } else {
+                    // El contenido cambió, actualizar temporal
+                    tempFilesData[file] = content;
+                }
             }
         });
-    }, 1000);
+    }, checkDelay);
 }
 
 module.exports = ocss;

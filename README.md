@@ -14,6 +14,13 @@ npm i -g @levihub/ocss
 ocss
 ```
 
+#### With delay (default 5 seconds)
+```bash
+ocss --delay 10
+# or
+ocss -d 10
+```
+
 ## Explanation
 
 OCSS automatically watches `.o.css` files in your project and generates corresponding CSS files with appropriate media queries.
